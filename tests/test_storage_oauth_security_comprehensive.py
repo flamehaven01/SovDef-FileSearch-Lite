@@ -17,8 +17,6 @@ from flamehaven_filesearch.oauth import (
 )
 from flamehaven_filesearch.security import (
     RequestContext,
-    REQUEST_CONTEXT_KEY,
-    _store_request_context,
     _oauth_to_api_key_info,
 )
 from flamehaven_filesearch.config import Config

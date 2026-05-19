@@ -3,9 +3,10 @@ Extra coverage tests for engine modules with remaining gaps.
 Targets: chronos_grid, format_backends, embedding_generator, gravitas_pack, intent_refiner.
 """
 
+from importlib.util import find_spec
+
 import pytest
-from unittest.mock import MagicMock, patch
-from typing import List
+from unittest.mock import patch
 
 
 # ===========================================================================
@@ -85,9 +86,7 @@ class TestChronosGridExtra:
         assert results == []
 
     def test_seek_vector_resonance_with_data(self):
-        try:
-            import numpy as np
-        except ImportError:
+        if find_spec("numpy") is None:
             pytest.skip("numpy not installed")
         grid = self._make_grid()
         for i in range(5):
@@ -98,9 +97,7 @@ class TestChronosGridExtra:
         assert len(results) <= 5
 
     def test_seek_vector_resonance_top_k_alias(self):
-        try:
-            import numpy as np
-        except ImportError:
+        if find_spec("numpy") is None:
             pytest.skip("numpy not installed")
         grid = self._make_grid()
         grid.inject_essence("q/1", {"x": 1}, [0.1] * 16)
@@ -108,9 +105,7 @@ class TestChronosGridExtra:
         assert isinstance(results, list)
 
     def test_prepare_vector_for_index(self):
-        try:
-            import numpy as np
-        except ImportError:
+        if find_spec("numpy") is None:
             pytest.skip("numpy not installed")
         grid = self._make_grid()
         vec = [0.1, 0.2, 0.3] + [0.0] * 13
@@ -118,9 +113,7 @@ class TestChronosGridExtra:
         assert result is not None
 
     def test_quantization_inject(self):
-        try:
-            import numpy as np
-        except ImportError:
+        if find_spec("numpy") is None:
             pytest.skip("numpy not installed")
         grid = self._make_grid(quantization=True)
         vec = [float(i) * 0.01 for i in range(16)]

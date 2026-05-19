@@ -4,7 +4,6 @@ Tests _collect_exceeded_quotas (pure function) and
 UsageTrackingMiddleware via ASGI test client.
 """
 
-import pytest
 
 from flamehaven_filesearch.usage_middleware import (
     _collect_exceeded_quotas,

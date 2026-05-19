@@ -3,9 +3,6 @@ Comprehensive tests for integrations/docling_loaders.py.
 Tests each loader class via mocked framework SDKs.
 """
 
-import sys
-from pathlib import Path
-from types import ModuleType
 from unittest.mock import MagicMock, patch
 
 import pytest

@@ -5,7 +5,7 @@ PostgresVectorStore tests are skipped unless postgres is available.
 """
 
 import time
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 
@@ -174,8 +174,6 @@ class TestRetryWithBackoff:
         assert call_count[0] == 2
 
     def test_exponential_backoff_delays(self):
-        delays = []
-        original_sleep = time.sleep
 
         @retry_with_backoff(max_retries=3, initial_delay=0.1, backoff_factor=2.0)
         def fail_twice():

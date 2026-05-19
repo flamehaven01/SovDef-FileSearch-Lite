@@ -3,16 +3,12 @@ Comprehensive tests for LocalSearchMixin (_search_local.py).
 Target: cover the 614 uncovered statements in that module.
 """
 
-import hashlib
-import os
-from pathlib import Path
 from typing import Any, Dict, List
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 from urllib.parse import quote
 
 import pytest
 
-from flamehaven_filesearch.config import Config
 from flamehaven_filesearch.core import FlamehavenFileSearch
 
 

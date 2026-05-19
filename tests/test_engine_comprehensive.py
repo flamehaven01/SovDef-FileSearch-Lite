@@ -6,20 +6,13 @@ Comprehensive tests for engine modules:
 - chronos_grid.py (additional coverage)
 """
 
-import hashlib
-import os
-import tempfile
-from pathlib import Path
-from typing import Any, List
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
-import pytest
 
 from flamehaven_filesearch.engine.embedding_generator import (
     EmbeddingGenerator,
     OllamaEmbeddingProvider,
     create_embedding_provider,
-    get_embedding_generator,
     reset_embedding_generator,
 )
 from flamehaven_filesearch.engine.obsidian_lite import (

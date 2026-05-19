@@ -188,6 +188,7 @@ def get_logger_with_request_id(name: str, request_id: str = None):
         )
         if not has_filter:
             logger.addFilter(RequestIdFilter(request_id))
+        return logging.LoggerAdapter(logger, {"request_id": request_id})
 
     return logger
 

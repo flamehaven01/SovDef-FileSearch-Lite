@@ -4,7 +4,6 @@ Target: cover the 132 uncovered statements.
 """
 
 import sqlite3
-import tempfile
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 

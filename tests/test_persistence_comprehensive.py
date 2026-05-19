@@ -5,7 +5,6 @@ Target: cover FlamehavenPersistence and get_persistence.
 
 import json
 import os
-from pathlib import Path
 
 import pytest
 

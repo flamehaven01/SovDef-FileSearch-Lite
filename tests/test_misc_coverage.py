@@ -3,8 +3,10 @@ Miscellaneous coverage tests for small modules with remaining gaps.
 Targets: quantizer.py, logging_config.py, validators.py, exceptions.py, middlewares.py
 """
 
-import pytest
 import logging
+from importlib.util import find_spec
+
+import pytest
 
 
 # ===========================================================================
@@ -93,15 +95,11 @@ class TestLoggingConfig:
         from flamehaven_filesearch.logging_config import get_logger_with_request_id
 
         logger = get_logger_with_request_id("test_module", "req123")
-        assert isinstance(logger, logging.Logger)
+        assert isinstance(logger, logging.LoggerAdapter)
+        assert logger.extra["request_id"] == "req123"
 
     def test_custom_json_formatter(self):
-        try:
-            from pythonjsonlogger import jsonlogger
-
-            _has_json = True
-        except ImportError:
-            _has_json = False
+        _has_json = find_spec("pythonjsonlogger") is not None
 
         from flamehaven_filesearch.logging_config import CustomJsonFormatter
 

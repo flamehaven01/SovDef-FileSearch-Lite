@@ -4,7 +4,6 @@ Target: cover core init paths, store management, persistence helpers, get_metric
 """
 
 import pytest
-from pathlib import Path
 
 from flamehaven_filesearch.core import FlamehavenFileSearch
 from flamehaven_filesearch.persistence import FlamehavenPersistence

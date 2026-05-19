@@ -11,13 +11,7 @@ Comprehensive tests for engine utility modules:
 - gravitas_pack.py
 """
 
-import os
-import tempfile
-from pathlib import Path
-from typing import Any, Dict, List
-from unittest.mock import MagicMock, patch
 
-import pytest
 
 
 # ---------------------------------------------------------------------------
@@ -592,7 +586,7 @@ class TestLLMProviders:
         config.llm_provider = "unknown_provider_xyz"
         # Should raise or return a provider — just verify no unhandled exception
         try:
-            provider = create_llm_provider(config)
+            create_llm_provider(config)
         except Exception as e:
             assert "provider" in str(e).lower() or "unknown" in str(e).lower() or True
 

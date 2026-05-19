@@ -412,7 +412,7 @@ class TestCreateLlmProvider:
         cfg = self._cfg("vllm")
         cfg.openai_base_url = "http://localhost:8000/v1"
         try:
-            p = create_llm_provider(cfg)
+            create_llm_provider(cfg)
         except ImportError:
             pytest.skip("openai not installed")
 

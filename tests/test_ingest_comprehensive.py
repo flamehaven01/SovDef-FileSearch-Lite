@@ -3,11 +3,7 @@ Comprehensive tests for IngestMixin (_ingest.py).
 Target: cover the 177 uncovered statements.
 """
 
-import hashlib
-import os
-import tempfile
 from pathlib import Path
-from typing import Any, Dict
 from urllib.parse import quote
 
 import pytest

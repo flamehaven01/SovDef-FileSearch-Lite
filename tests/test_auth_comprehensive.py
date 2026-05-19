@@ -3,12 +3,9 @@ Comprehensive tests for auth.py (APIKeyManager).
 Target: cover the 173 uncovered statements.
 """
 
-import hashlib
 import json
 import sqlite3
-import tempfile
 import uuid
-from datetime import datetime, timezone
 from pathlib import Path
 
 import pytest
@@ -75,11 +72,11 @@ class TestAPIKeyInfo:
 
 class TestAPIKeyManagerInit:
     def test_db_created(self, temp_db):
-        mgr = APIKeyManager(db_path=temp_db)
+        APIKeyManager(db_path=temp_db)
         assert Path(temp_db).exists()
 
     def test_tables_created(self, temp_db):
-        mgr = APIKeyManager(db_path=temp_db)
+        APIKeyManager(db_path=temp_db)
         with sqlite3.connect(temp_db) as conn:
             tables = conn.execute(
                 "SELECT name FROM sqlite_master WHERE type='table'"
@@ -153,7 +150,7 @@ class TestValidateKey:
 
     def test_valid_updates_last_used(self, manager):
         _, plain_key = manager.generate_key("user1", "Key")
-        info1 = manager.validate_key(plain_key)
+        manager.validate_key(plain_key)
         info2 = manager.validate_key(plain_key)
         # Both should succeed (last_used should be set)
         assert info2 is not None
