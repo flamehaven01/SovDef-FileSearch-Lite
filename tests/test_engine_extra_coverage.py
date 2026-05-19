@@ -16,6 +16,7 @@ from typing import List
 class TestChronosGridExtra:
     def _make_grid(self, backend="memory", quantization=False):
         from flamehaven_filesearch.engine.chronos_grid import ChronosGrid, ChronosConfig
+
         config = ChronosConfig(
             vector_index_backend=backend,
             hnsw_m=8,
@@ -73,7 +74,9 @@ class TestChronosGridExtra:
     def test_inject_multiple_essences(self):
         grid = self._make_grid()
         for i in range(10):
-            grid.inject_essence(f"uri/{i}", {"title": f"doc{i}"}, [float(j) * 0.01 for j in range(16)])
+            grid.inject_essence(
+                f"uri/{i}", {"title": f"doc{i}"}, [float(j) * 0.01 for j in range(16)]
+            )
         assert grid.total_lore_essences == 10
 
     def test_seek_vector_resonance_empty(self):
@@ -132,6 +135,7 @@ class TestChronosGridExtra:
 
     def test_spark_buffer_overflow(self):
         from flamehaven_filesearch.engine.chronos_grid import ChronosGrid, ChronosConfig
+
         config = ChronosConfig(vector_essence_dimension=8)
         grid = ChronosGrid(config=config)
         # Inject more than spark buffer capacity
@@ -154,6 +158,7 @@ class TestChronosGridExtra:
 class TestGravitasPackerExtra:
     def test_compress_decompress_roundtrip(self):
         from flamehaven_filesearch.engine.gravitas_pack import GravitasPacker
+
         packer = GravitasPacker()
         metadata = {
             "file_path": "/vault/notes/document.pdf",
@@ -166,27 +171,32 @@ class TestGravitasPackerExtra:
 
     def test_compress_empty_metadata(self):
         from flamehaven_filesearch.engine.gravitas_pack import GravitasPacker
+
         packer = GravitasPacker()
         assert packer.compress_metadata({}) == ""
 
     def test_compress_none_metadata(self):
         from flamehaven_filesearch.engine.gravitas_pack import GravitasPacker
+
         packer = GravitasPacker()
         assert packer.compress_metadata(None) == ""
 
     def test_decompress_empty_string(self):
         from flamehaven_filesearch.engine.gravitas_pack import GravitasPacker
+
         packer = GravitasPacker()
         assert packer.decompress_metadata("") == {}
 
     def test_decompress_invalid_json(self):
         from flamehaven_filesearch.engine.gravitas_pack import GravitasPacker
+
         packer = GravitasPacker()
         result = packer.decompress_metadata("not_valid_json{")
         assert result == {}
 
     def test_get_stats_after_compress(self):
         from flamehaven_filesearch.engine.gravitas_pack import GravitasPacker
+
         packer = GravitasPacker()
         packer.compress_metadata({"file_path": "/vault/doc.md"})
         stats = packer.get_stats()
@@ -194,6 +204,7 @@ class TestGravitasPackerExtra:
 
     def test_get_stats_after_decompress(self):
         from flamehaven_filesearch.engine.gravitas_pack import GravitasPacker
+
         packer = GravitasPacker()
         compressed = packer.compress_metadata({"title": "test"})
         packer.decompress_metadata(compressed)
@@ -202,6 +213,7 @@ class TestGravitasPackerExtra:
 
     def test_reset_stats(self):
         from flamehaven_filesearch.engine.gravitas_pack import GravitasPacker
+
         packer = GravitasPacker()
         packer.compress_metadata({"k": "v"})
         packer.reset_stats()
@@ -209,28 +221,35 @@ class TestGravitasPackerExtra:
 
     def test_estimate_compression_ratio_empty(self):
         from flamehaven_filesearch.engine.gravitas_pack import GravitasPacker
+
         packer = GravitasPacker()
         assert packer.estimate_compression_ratio({}) == 0.0
 
     def test_estimate_compression_ratio_with_data(self):
         from flamehaven_filesearch.engine.gravitas_pack import GravitasPacker
+
         packer = GravitasPacker()
-        ratio = packer.estimate_compression_ratio({"file_path": "/long/path/to/file.pdf"})
+        ratio = packer.estimate_compression_ratio(
+            {"file_path": "/long/path/to/file.pdf"}
+        )
         assert 0.0 < ratio <= 1.0
 
     def test_quick_compress_classmethod(self):
         from flamehaven_filesearch.engine.gravitas_pack import GravitasPacker
+
         result = GravitasPacker.quick_compress({"title": "test"})
         assert isinstance(result, str)
 
     def test_quick_decompress_classmethod(self):
         from flamehaven_filesearch.engine.gravitas_pack import GravitasPacker
+
         compressed = GravitasPacker.quick_compress({"title": "test"})
         result = GravitasPacker.quick_decompress(compressed)
         assert isinstance(result, dict)
 
     def test_bytes_saved_positive(self):
         from flamehaven_filesearch.engine.gravitas_pack import GravitasPacker
+
         packer = GravitasPacker()
         metadata = {
             "file_path": "/home/user/documents/very_long_document_name.pdf",
@@ -250,18 +269,21 @@ class TestGravitasPackerExtra:
 class TestIntentRefinerExtra:
     def test_extract_keywords_basic(self):
         from flamehaven_filesearch.engine.intent_refiner import IntentRefiner
+
         refiner = IntentRefiner()
         result = refiner.refine_intent("find important documents about python")
         assert "python" in result.keywords or "document" in result.keywords
 
     def test_extract_extensions_from_query(self):
         from flamehaven_filesearch.engine.intent_refiner import IntentRefiner
+
         refiner = IntentRefiner()
         result = refiner.refine_intent("find all .pdf files")
         assert "pdf" in result.file_extensions or len(result.file_extensions) >= 0
 
     def test_typo_correction(self):
         from flamehaven_filesearch.engine.intent_refiner import IntentRefiner
+
         refiner = IntentRefiner()
         result = refiner.refine_intent("machien learning tutorial")
         # Should detect "machien" typo
@@ -269,6 +291,7 @@ class TestIntentRefinerExtra:
 
     def test_metadata_filters_size(self):
         from flamehaven_filesearch.engine.intent_refiner import IntentRefiner
+
         refiner = IntentRefiner()
         result = refiner.refine_intent("documents size:>1MB")
         # Size filter should be extracted
@@ -276,12 +299,14 @@ class TestIntentRefinerExtra:
 
     def test_metadata_filters_date(self):
         from flamehaven_filesearch.engine.intent_refiner import IntentRefiner
+
         refiner = IntentRefiner()
         result = refiner.refine_intent("notes after:2024-01 before:2025-01")
         assert isinstance(result.metadata_filters, dict)
 
     def test_levenshtein_distance(self):
         from flamehaven_filesearch.engine.intent_refiner import IntentRefiner
+
         refiner = IntentRefiner()
         assert refiner._levenshtein_distance("cat", "cat") == 0
         assert refiner._levenshtein_distance("cat", "cut") == 1
@@ -289,12 +314,14 @@ class TestIntentRefinerExtra:
 
     def test_levenshtein_empty_strings(self):
         from flamehaven_filesearch.engine.intent_refiner import IntentRefiner
+
         refiner = IntentRefiner()
         assert refiner._levenshtein_distance("", "abc") == 3
         assert refiner._levenshtein_distance("abc", "") == 3
 
     def test_stats_after_queries(self):
         from flamehaven_filesearch.engine.intent_refiner import IntentRefiner
+
         refiner = IntentRefiner()
         refiner.refine_intent("python tutorial")
         refiner.refine_intent("machine learning")
@@ -303,12 +330,14 @@ class TestIntentRefinerExtra:
 
     def test_chinese_lang_detection(self):
         from flamehaven_filesearch.engine.intent_refiner import IntentRefiner
+
         refiner = IntentRefiner()
         result = refiner.refine_intent("python documentation")
         assert result is not None
 
     def test_find_similar_none(self):
         from flamehaven_filesearch.engine.intent_refiner import IntentRefiner
+
         refiner = IntentRefiner()
         result = refiner._find_similar("zzzzzzz", threshold=1)
         assert result is None
@@ -322,15 +351,19 @@ class TestIntentRefinerExtra:
 class TestFormatBackendsExtra:
     def test_pdf_extract_no_library(self, tmp_path):
         from flamehaven_filesearch.engine.format_backends import PDFBackend
+
         f = tmp_path / "test.pdf"
         f.write_bytes(b"%PDF-1.4 dummy")
         # Without pymupdf or pypdf, should return ""
         import builtins
+
         real_import = builtins.__import__
+
         def no_pdf_import(name, *args, **kwargs):
             if name in ("fitz", "pymupdf", "pypdf"):
                 raise ImportError(f"no {name}")
             return real_import(name, *args, **kwargs)
+
         with patch("builtins.__import__", side_effect=no_pdf_import):
             backend = PDFBackend()
             result = backend.extract(str(f))
@@ -338,14 +371,18 @@ class TestFormatBackendsExtra:
 
     def test_docx_extract_no_library(self, tmp_path):
         from flamehaven_filesearch.engine.format_backends import DOCXBackend
+
         f = tmp_path / "test.docx"
         f.write_text("fake docx content")
         import builtins
+
         real_import = builtins.__import__
+
         def no_docx(name, *args, **kwargs):
             if name == "docx":
                 raise ImportError("no docx")
             return real_import(name, *args, **kwargs)
+
         with patch("builtins.__import__", side_effect=no_docx):
             backend = DOCXBackend()
             result = backend.extract(str(f))
@@ -353,6 +390,7 @@ class TestFormatBackendsExtra:
 
     def test_doc_extract_no_antiword(self, tmp_path):
         from flamehaven_filesearch.engine.format_backends import DOCBackend
+
         f = tmp_path / "test.doc"
         f.write_bytes(b"\xd0\xcf\x11\xe0" + b"\x00" * 50)
         backend = DOCBackend()
@@ -361,14 +399,18 @@ class TestFormatBackendsExtra:
 
     def test_rtf_extract_no_striprtf(self, tmp_path):
         from flamehaven_filesearch.engine.format_backends import RTFBackend
+
         f = tmp_path / "test.rtf"
         f.write_text("{\\rtf1\\ansi Hello World}")
         import builtins
+
         real_import = builtins.__import__
+
         def no_striprtf(name, *args, **kwargs):
             if name == "striprtf" or name == "striprtf.striprtf":
                 raise ImportError("no striprtf")
             return real_import(name, *args, **kwargs)
+
         with patch("builtins.__import__", side_effect=no_striprtf):
             backend = RTFBackend()
             result = backend.extract(str(f))
@@ -376,14 +418,18 @@ class TestFormatBackendsExtra:
 
     def test_xlsx_extract_no_openpyxl(self, tmp_path):
         from flamehaven_filesearch.engine.format_backends import XLSXBackend
+
         f = tmp_path / "test.xlsx"
         f.write_bytes(b"PK fake excel")
         import builtins
+
         real_import = builtins.__import__
+
         def no_openpyxl(name, *args, **kwargs):
             if name == "openpyxl":
                 raise ImportError("no openpyxl")
             return real_import(name, *args, **kwargs)
+
         with patch("builtins.__import__", side_effect=no_openpyxl):
             backend = XLSXBackend()
             result = backend.extract(str(f))
@@ -391,14 +437,18 @@ class TestFormatBackendsExtra:
 
     def test_pptx_extract_no_python_pptx(self, tmp_path):
         from flamehaven_filesearch.engine.format_backends import PPTXBackend
+
         f = tmp_path / "test.pptx"
         f.write_bytes(b"PK fake pptx")
         import builtins
+
         real_import = builtins.__import__
+
         def no_pptx(name, *args, **kwargs):
             if name == "pptx":
                 raise ImportError("no pptx")
             return real_import(name, *args, **kwargs)
+
         with patch("builtins.__import__", side_effect=no_pptx):
             backend = PPTXBackend()
             result = backend.extract(str(f))
@@ -406,12 +456,14 @@ class TestFormatBackendsExtra:
 
     def test_backend_registry_default(self):
         from flamehaven_filesearch.engine.format_backends import BackendRegistry
+
         registry = BackendRegistry.default()
         exts = registry.supported_extensions()
         assert len(exts) > 0
 
     def test_backend_registry_get_none(self):
         from flamehaven_filesearch.engine.format_backends import BackendRegistry
+
         registry = BackendRegistry.default()
         result = registry.get(".xyz_unknown")
         assert result is None
@@ -421,6 +473,7 @@ class TestFormatBackendsExtra:
 
         class ConcreteBackend(AbstractFormatBackend):
             supported_extensions = {".test"}
+
             def extract(self, file_path):
                 return ""
 
@@ -432,6 +485,7 @@ class TestFormatBackendsExtra:
 
         class ConcreteBackend(AbstractFormatBackend):
             supported_extensions = {".test"}
+
             def extract(self, file_path):
                 return self._read_plain(file_path)
 
@@ -446,6 +500,7 @@ class TestFormatBackendsExtra:
 
         class ConcreteBackend(AbstractFormatBackend):
             supported_extensions = {".test"}
+
             def extract(self, file_path):
                 return ""
 
@@ -462,6 +517,7 @@ class TestFormatBackendsExtra:
 class TestEmbeddingGeneratorExtra:
     def test_generate_empty_string(self):
         from flamehaven_filesearch.engine.embedding_generator import EmbeddingGenerator
+
         gen = EmbeddingGenerator()
         vec = gen.generate("")
         assert vec is not None
@@ -469,6 +525,7 @@ class TestEmbeddingGeneratorExtra:
 
     def test_generate_long_text(self):
         from flamehaven_filesearch.engine.embedding_generator import EmbeddingGenerator
+
         gen = EmbeddingGenerator()
         long_text = "word " * 500
         vec = gen.generate(long_text)
@@ -476,6 +533,7 @@ class TestEmbeddingGeneratorExtra:
 
     def test_clear_cache(self):
         from flamehaven_filesearch.engine.embedding_generator import EmbeddingGenerator
+
         gen = EmbeddingGenerator()
         gen.generate("hello world")
         gen.clear_cache()
@@ -484,6 +542,7 @@ class TestEmbeddingGeneratorExtra:
 
     def test_reset_stats(self):
         from flamehaven_filesearch.engine.embedding_generator import EmbeddingGenerator
+
         gen = EmbeddingGenerator()
         gen.generate("test")
         gen.reset_stats()
@@ -492,6 +551,7 @@ class TestEmbeddingGeneratorExtra:
 
     def test_batch_generate(self):
         from flamehaven_filesearch.engine.embedding_generator import EmbeddingGenerator
+
         gen = EmbeddingGenerator()
         texts = ["text one", "text two", "text three"]
         results = gen.batch_generate(texts)
@@ -501,18 +561,21 @@ class TestEmbeddingGeneratorExtra:
 
     def test_batch_generate_empty(self):
         from flamehaven_filesearch.engine.embedding_generator import EmbeddingGenerator
+
         gen = EmbeddingGenerator()
         results = gen.batch_generate([])
         assert results == []
 
     def test_generate_cjk_text(self):
         from flamehaven_filesearch.engine.embedding_generator import EmbeddingGenerator
+
         gen = EmbeddingGenerator()
         vec = gen.generate("文档搜索")  # Chinese "document search"
         assert len(vec) == gen.vector_dim
 
     def test_cache_stats_fields(self):
         from flamehaven_filesearch.engine.embedding_generator import EmbeddingGenerator
+
         gen = EmbeddingGenerator()
         gen.generate("stats test")
         stats = gen.get_cache_stats()
@@ -520,6 +583,7 @@ class TestEmbeddingGeneratorExtra:
 
     def test_generate_returns_vector(self):
         from flamehaven_filesearch.engine.embedding_generator import EmbeddingGenerator
+
         gen = EmbeddingGenerator()
         v1 = gen.generate("hello world")
         v2 = gen.generate("completely different text content here")
@@ -527,7 +591,10 @@ class TestEmbeddingGeneratorExtra:
         assert len(v1) == len(v2) == gen.vector_dim
 
     def test_ollama_provider_init(self):
-        from flamehaven_filesearch.engine.embedding_generator import OllamaEmbeddingProvider
+        from flamehaven_filesearch.engine.embedding_generator import (
+            OllamaEmbeddingProvider,
+        )
+
         provider = OllamaEmbeddingProvider(
             model="nomic-embed-text",
             base_url="http://localhost:11434",
@@ -535,7 +602,10 @@ class TestEmbeddingGeneratorExtra:
         assert provider is not None
 
     def test_ollama_provider_generate_failure(self):
-        from flamehaven_filesearch.engine.embedding_generator import OllamaEmbeddingProvider
+        from flamehaven_filesearch.engine.embedding_generator import (
+            OllamaEmbeddingProvider,
+        )
+
         provider = OllamaEmbeddingProvider(
             model="nomic-embed-text",
             base_url="http://localhost:1",  # wrong port
@@ -547,20 +617,25 @@ class TestEmbeddingGeneratorExtra:
 
     def test_create_embedding_provider_dsp(self):
         from flamehaven_filesearch.engine.embedding_generator import (
-            create_embedding_provider, EmbeddingGenerator
+            create_embedding_provider,
+            EmbeddingGenerator,
         )
+
         provider = create_embedding_provider("dsp")
         assert isinstance(provider, EmbeddingGenerator)
 
     def test_create_embedding_provider_ollama(self):
         from flamehaven_filesearch.engine.embedding_generator import (
-            create_embedding_provider, OllamaEmbeddingProvider
+            create_embedding_provider,
+            OllamaEmbeddingProvider,
         )
+
         provider = create_embedding_provider("ollama", ollama_model="nomic-embed-text")
         assert isinstance(provider, OllamaEmbeddingProvider)
 
     def test_generate_multimodal(self):
         from flamehaven_filesearch.engine.embedding_generator import EmbeddingGenerator
+
         gen = EmbeddingGenerator()
         fake_image = b"\x89PNG\r\n\x1a\n" + b"\x00" * 100
         # generate_image_bytes or generate_multimodal may accept image bytes
@@ -585,21 +660,25 @@ class TestWsRoutesHelpers:
         fs = FlamehavenFileSearch(allow_offline=True)
         set_searcher(fs)
         from flamehaven_filesearch import ws_routes
+
         assert ws_routes._searcher is fs
         # Reset
         set_searcher(None)
 
     def test_validate_token_empty(self):
         from flamehaven_filesearch.ws_routes import _validate_token
+
         assert _validate_token("") is False
 
     def test_validate_token_invalid(self):
         from flamehaven_filesearch.ws_routes import _validate_token
+
         assert _validate_token("invalid_key_xyz_123") is False
 
     def test_validate_token_valid(self):
         from flamehaven_filesearch.ws_routes import _validate_token
         from flamehaven_filesearch.auth import get_key_manager
+
         km = get_key_manager()
         key_id, plain_key = km.generate_key(
             user_id="ws_test_user",
@@ -619,43 +698,53 @@ class TestWsRoutesHelpers:
 class TestLangProcessorExtra:
     def test_tokenize_english(self):
         from flamehaven_filesearch.engine.lang_processor import tokenize
+
         tokens = tokenize("hello world test", lang="en")
         assert "hello" in tokens
 
     def test_tokenize_cjk(self):
         from flamehaven_filesearch.engine.lang_processor import tokenize
+
         tokens = tokenize("文档搜索")
         assert len(tokens) >= 1
 
     def test_get_stopwords_english(self):
         from flamehaven_filesearch.engine.lang_processor import get_stopwords
+
         stops = get_stopwords("en")
         assert "the" in stops or "a" in stops or len(stops) >= 0
 
     def test_get_stopwords_other(self):
         from flamehaven_filesearch.engine.lang_processor import get_stopwords
+
         stops = get_stopwords("ja")
         assert isinstance(stops, set)
 
     def test_get_stopwords_none(self):
         from flamehaven_filesearch.engine.lang_processor import get_stopwords
+
         stops = get_stopwords(None)
         assert isinstance(stops, set)
 
     def test_detect_language_english(self):
         from flamehaven_filesearch.engine.lang_processor import detect_language
+
         lang = detect_language("hello world this is english text")
         assert lang in ("en", None) or isinstance(lang, str)
 
     def test_detect_language_cjk(self):
         from flamehaven_filesearch.engine.lang_processor import detect_language
+
         lang = detect_language("中文文本")
         # May return "zh", "zh-cn", or None depending on implementation
         assert lang is None or isinstance(lang, str)
 
     def test_extract_keywords_chinese(self):
         try:
-            from flamehaven_filesearch.engine.lang_processor import extract_keywords_chinese
+            from flamehaven_filesearch.engine.lang_processor import (
+                extract_keywords_chinese,
+            )
+
             result = extract_keywords_chinese("文档搜索技术")
             assert isinstance(result, list)
         except (ImportError, AttributeError):

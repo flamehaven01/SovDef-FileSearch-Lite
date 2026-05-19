@@ -8,6 +8,8 @@ import logging
 import sys
 from datetime import datetime, timezone
 
+from . import __version__
+
 try:
     from pythonjsonlogger import jsonlogger
 
@@ -33,7 +35,7 @@ if _JSONLOGGER_AVAILABLE:
 
             # Add service identification
             log_record["service"] = "flamehaven-filesearch"
-            log_record["version"] = "1.4.2"
+            log_record["version"] = __version__
 
             # Add request ID if available
             if hasattr(record, "request_id"):
@@ -70,6 +72,7 @@ else:
                 "logger": record.name,
                 "message": record.getMessage(),
                 "service": "flamehaven-filesearch",
+                "version": __version__,
                 "environment": os.getenv("ENVIRONMENT", "development"),
             }
             if hasattr(record, "request_id"):
@@ -125,6 +128,14 @@ def setup_json_logging(log_level=logging.INFO, **kwargs):
     return root_logger
 
 
+def setup_logging(log_level=logging.INFO, **kwargs):
+    """Backward-compatible logging entry point used by older tests/callers."""
+    environment = kwargs.pop("environment", None) or kwargs.pop("mode", None)
+    if environment == "development":
+        return setup_development_logging(log_level=log_level, **kwargs)
+    return setup_json_logging(log_level=log_level, **kwargs)
+
+
 def setup_development_logging(log_level=logging.INFO, **kwargs):
     """
     Setup human-readable logging for development
@@ -170,8 +181,13 @@ def get_logger_with_request_id(name: str, request_id: str = None):
     logger = logging.getLogger(name)
 
     if request_id:
-        # Use LoggerAdapter to inject request_id into all log records
-        return logging.LoggerAdapter(logger, {"request_id": request_id})
+        has_filter = any(
+            isinstance(existing, RequestIdFilter)
+            and getattr(existing, "request_id", None) == request_id
+            for existing in logger.filters
+        )
+        if not has_filter:
+            logger.addFilter(RequestIdFilter(request_id))
 
     return logger
 
@@ -223,7 +239,7 @@ EXAMPLE_LOGS = {
         "message": "File uploaded successfully",
         "request_id": "a1b2c3d4-5678-90ab-cdef",
         "service": "flamehaven-filesearch",
-        "version": "1.1.0",
+        "version": __version__,
         "environment": "production",
         "filename": "document.pdf",
         "size_mb": 2.5,
@@ -235,7 +251,7 @@ EXAMPLE_LOGS = {
         "message": "File upload failed",
         "request_id": "a1b2c3d4-5678-90ab-cdef",
         "service": "flamehaven-filesearch",
-        "version": "1.1.0",
+        "version": __version__,
         "environment": "production",
         "error": "FileSizeExceededError",
         "error_message": "File size exceeds maximum",
@@ -249,7 +265,7 @@ EXAMPLE_LOGS = {
         "message": "Rate limit approaching",
         "request_id": "a1b2c3d4-5678-90ab-cdef",
         "service": "flamehaven-filesearch",
-        "version": "1.1.0",
+        "version": __version__,
         "environment": "production",
         "endpoint": "/api/upload/single",
         "requests_count": 8,

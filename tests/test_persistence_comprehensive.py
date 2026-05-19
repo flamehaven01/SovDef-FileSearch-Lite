@@ -197,6 +197,7 @@ class TestJsonDefault:
     def test_numpy_types_if_available(self):
         try:
             import numpy as np
+
             assert _json_default(np.int32(5)) == 5
             assert _json_default(np.float32(1.5)) == pytest.approx(1.5, abs=0.01)
             arr = np.array([1, 2, 3])

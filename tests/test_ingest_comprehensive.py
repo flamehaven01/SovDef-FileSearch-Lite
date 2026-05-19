@@ -32,7 +32,10 @@ class TestNormalizeAliasText:
         assert searcher._normalize_alias_text("Hello World") == "hello world"
 
     def test_separators_to_spaces(self, searcher):
-        assert searcher._normalize_alias_text("hello_world-test.file") == "hello world test file"
+        assert (
+            searcher._normalize_alias_text("hello_world-test.file")
+            == "hello world test file"
+        )
 
     def test_strip_whitespace(self, searcher):
         assert searcher._normalize_alias_text("  hello  ") == "hello"
@@ -70,10 +73,14 @@ class TestFilenameAliases:
             seen.add(a)
 
     def test_with_obsidian_note(self, searcher):
-        mock_note = type("Note", (), {
-            "aliases": ["python programming"],
-            "frontmatter": {"title": "Python Guide"},
-        })()
+        mock_note = type(
+            "Note",
+            (),
+            {
+                "aliases": ["python programming"],
+                "frontmatter": {"title": "Python Guide"},
+            },
+        )()
         aliases = searcher._filename_aliases(
             "/vault/python.md", obsidian_note=mock_note
         )
@@ -330,7 +337,9 @@ class TestLocalUpload:
         f = tmp_path / "image.png"
         f.write_bytes(b"\x89PNG\r\n\x1a\n" + b"\x00" * 50)
         # Provide vision_text manually
-        result = searcher._local_upload(str(f), "default", 0.01, vision_text="image description")
+        result = searcher._local_upload(
+            str(f), "default", 0.01, vision_text="image description"
+        )
         assert result["status"] == "success"
 
     def test_marks_bm25_dirty(self, searcher, tmp_path):
@@ -342,12 +351,17 @@ class TestLocalUpload:
     def test_obsidian_note_chunking(self, searcher, tmp_path):
         searcher.config.obsidian_light_mode = True
         f = tmp_path / "obsidian_note.md"
-        content = "# Title\n\n## Section 1\nContent here.\n\n## Section 2\nMore content."
+        content = (
+            "# Title\n\n## Section 1\nContent here.\n\n## Section 2\nMore content."
+        )
         f.write_text(content)
 
         from flamehaven_filesearch.engine.obsidian_lite import parse_obsidian_markdown
+
         note = parse_obsidian_markdown(content)
-        result = searcher._local_upload(str(f), "default", 0.01, obsidian_note=note, extracted_content=content)
+        result = searcher._local_upload(
+            str(f), "default", 0.01, obsidian_note=note, extracted_content=content
+        )
         assert result["status"] == "success"
 
 

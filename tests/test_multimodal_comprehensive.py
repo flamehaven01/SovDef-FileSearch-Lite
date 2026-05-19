@@ -32,6 +32,7 @@ class TestTimeoutContext:
     def test_windows_no_sigalrm(self):
         # On Windows there is no SIGALRM; context manager must still work
         import signal
+
         orig = getattr(signal, "SIGALRM", None)
         if orig is not None:
             pass  # Unix test coverage handled elsewhere
@@ -121,6 +122,7 @@ class TestPillowVisionModal:
 
     def test_pillow_raises_without_pillow(self, monkeypatch):
         import builtins
+
         real_import = builtins.__import__
 
         def mock_import(name, *args, **kwargs):
@@ -130,6 +132,7 @@ class TestPillowVisionModal:
 
         monkeypatch.setattr(builtins, "__import__", mock_import)
         from flamehaven_filesearch.multimodal import PillowVisionModal
+
         with pytest.raises(RuntimeError, match="Pillow"):
             PillowVisionModal()
 
@@ -186,6 +189,7 @@ class TestMultimodalProcessor:
         class SlowModal:
             def describe_image(self, image_bytes, strategy):
                 import time
+
                 time.sleep(10)
                 return "never"
 
@@ -267,6 +271,7 @@ class TestSelectVisionModal:
 
     def test_auto_falls_back_to_noop_without_pillow(self, monkeypatch):
         import builtins
+
         real_import = builtins.__import__
 
         def mock_import(name, *args, **kwargs):
@@ -281,6 +286,7 @@ class TestSelectVisionModal:
 
     def test_pillow_provider_falls_back_without_pillow(self, monkeypatch):
         import builtins
+
         real_import = builtins.__import__
 
         def mock_import(name, *args, **kwargs):
@@ -295,6 +301,7 @@ class TestSelectVisionModal:
 
     def test_tesseract_provider_falls_back_without_pytesseract(self, monkeypatch):
         import builtins
+
         real_import = builtins.__import__
 
         def mock_import(name, *args, **kwargs):

@@ -18,7 +18,9 @@ import pytest
 
 class TestFlamehavenCrewAITool:
     def test_run_returns_text(self, tmp_path):
-        from flamehaven_filesearch.integrations.docling_loaders import FlamehavenCrewAITool
+        from flamehaven_filesearch.integrations.docling_loaders import (
+            FlamehavenCrewAITool,
+        )
 
         f = tmp_path / "note.txt"
         f.write_text("hello from the tool")
@@ -28,14 +30,20 @@ class TestFlamehavenCrewAITool:
         assert "hello" in result
 
     def test_run_nonexistent_returns_no_text_message(self):
-        from flamehaven_filesearch.integrations.docling_loaders import FlamehavenCrewAITool
+        from flamehaven_filesearch.integrations.docling_loaders import (
+            FlamehavenCrewAITool,
+        )
 
         tool = FlamehavenCrewAITool()
         result = tool.run("/nonexistent/file.txt")
-        assert "FlamehavenCrewAITool" in result or result == "" or isinstance(result, str)
+        assert (
+            "FlamehavenCrewAITool" in result or result == "" or isinstance(result, str)
+        )
 
     def test_run_method_calls_private_run(self, tmp_path):
-        from flamehaven_filesearch.integrations.docling_loaders import FlamehavenCrewAITool
+        from flamehaven_filesearch.integrations.docling_loaders import (
+            FlamehavenCrewAITool,
+        )
 
         f = tmp_path / "doc.txt"
         f.write_text("test content here")
@@ -44,7 +52,9 @@ class TestFlamehavenCrewAITool:
 
     @pytest.mark.asyncio
     async def test_arun_returns_text(self, tmp_path):
-        from flamehaven_filesearch.integrations.docling_loaders import FlamehavenCrewAITool
+        from flamehaven_filesearch.integrations.docling_loaders import (
+            FlamehavenCrewAITool,
+        )
 
         f = tmp_path / "async.txt"
         f.write_text("async content")
@@ -53,14 +63,20 @@ class TestFlamehavenCrewAITool:
         assert isinstance(result, str)
 
     def test_tool_has_name_and_description(self):
-        from flamehaven_filesearch.integrations.docling_loaders import FlamehavenCrewAITool
+        from flamehaven_filesearch.integrations.docling_loaders import (
+            FlamehavenCrewAITool,
+        )
 
         tool = FlamehavenCrewAITool()
         assert hasattr(tool, "name") or hasattr(FlamehavenCrewAITool, "name")
-        assert hasattr(tool, "description") or hasattr(FlamehavenCrewAITool, "description")
+        assert hasattr(tool, "description") or hasattr(
+            FlamehavenCrewAITool, "description"
+        )
 
     def test_empty_file_returns_message(self, tmp_path):
-        from flamehaven_filesearch.integrations.docling_loaders import FlamehavenCrewAITool
+        from flamehaven_filesearch.integrations.docling_loaders import (
+            FlamehavenCrewAITool,
+        )
 
         f = tmp_path / "empty.txt"
         f.write_text("")
@@ -80,21 +96,34 @@ class TestFlamehavenLangChainLoader:
             def __init__(self, page_content="", metadata=None):
                 self.page_content = page_content
                 self.metadata = metadata or {}
+
         return FakeLCDocument
 
     def test_load_raises_without_langchain(self, tmp_path):
-        from flamehaven_filesearch.integrations.docling_loaders import FlamehavenLangChainLoader
+        from flamehaven_filesearch.integrations.docling_loaders import (
+            FlamehavenLangChainLoader,
+        )
 
         f = tmp_path / "note.txt"
         f.write_text("hello")
 
-        with patch.dict("sys.modules", {"langchain_core": None, "langchain_core.documents": None, "langchain": None, "langchain.schema": None}):
+        with patch.dict(
+            "sys.modules",
+            {
+                "langchain_core": None,
+                "langchain_core.documents": None,
+                "langchain": None,
+                "langchain.schema": None,
+            },
+        ):
             loader = FlamehavenLangChainLoader(str(f))
             with pytest.raises((ImportError, Exception)):
                 loader.load()
 
     def test_load_with_mocked_langchain(self, tmp_path):
-        from flamehaven_filesearch.integrations.docling_loaders import FlamehavenLangChainLoader
+        from flamehaven_filesearch.integrations.docling_loaders import (
+            FlamehavenLangChainLoader,
+        )
 
         f = tmp_path / "test.txt"
         f.write_text("test content for langchain")
@@ -103,14 +132,19 @@ class TestFlamehavenLangChainLoader:
         mock_lc = MagicMock()
         mock_lc.documents.Document = FakeLCDocument
 
-        with patch.dict("sys.modules", {"langchain_core": mock_lc, "langchain_core.documents": mock_lc.documents}):
+        with patch.dict(
+            "sys.modules",
+            {"langchain_core": mock_lc, "langchain_core.documents": mock_lc.documents},
+        ):
             loader = FlamehavenLangChainLoader(str(f))
             docs = loader.load()
             assert len(docs) == 1
             assert "test" in docs[0].page_content
 
     def test_load_with_chunking(self, tmp_path):
-        from flamehaven_filesearch.integrations.docling_loaders import FlamehavenLangChainLoader
+        from flamehaven_filesearch.integrations.docling_loaders import (
+            FlamehavenLangChainLoader,
+        )
 
         f = tmp_path / "long.txt"
         f.write_text("sentence one. " * 200)
@@ -119,13 +153,18 @@ class TestFlamehavenLangChainLoader:
         mock_lc = MagicMock()
         mock_lc.documents.Document = FakeLCDocument
 
-        with patch.dict("sys.modules", {"langchain_core": mock_lc, "langchain_core.documents": mock_lc.documents}):
+        with patch.dict(
+            "sys.modules",
+            {"langchain_core": mock_lc, "langchain_core.documents": mock_lc.documents},
+        ):
             loader = FlamehavenLangChainLoader(str(f), chunk=True, max_tokens=50)
             docs = loader.load()
             assert len(docs) >= 1
 
     def test_lazy_load(self, tmp_path):
-        from flamehaven_filesearch.integrations.docling_loaders import FlamehavenLangChainLoader
+        from flamehaven_filesearch.integrations.docling_loaders import (
+            FlamehavenLangChainLoader,
+        )
 
         f = tmp_path / "lazy.txt"
         f.write_text("lazy load content")
@@ -134,13 +173,18 @@ class TestFlamehavenLangChainLoader:
         mock_lc = MagicMock()
         mock_lc.documents.Document = FakeLCDocument
 
-        with patch.dict("sys.modules", {"langchain_core": mock_lc, "langchain_core.documents": mock_lc.documents}):
+        with patch.dict(
+            "sys.modules",
+            {"langchain_core": mock_lc, "langchain_core.documents": mock_lc.documents},
+        ):
             loader = FlamehavenLangChainLoader(str(f))
             docs = list(loader.lazy_load())
             assert len(docs) >= 1
 
     def test_load_fallback_to_langchain_schema(self, tmp_path):
-        from flamehaven_filesearch.integrations.docling_loaders import FlamehavenLangChainLoader
+        from flamehaven_filesearch.integrations.docling_loaders import (
+            FlamehavenLangChainLoader,
+        )
 
         f = tmp_path / "fallback.txt"
         f.write_text("fallback content")
@@ -149,7 +193,15 @@ class TestFlamehavenLangChainLoader:
         mock_legacy = MagicMock()
         mock_legacy.Document = FakeLCDocument
 
-        with patch.dict("sys.modules", {"langchain_core": None, "langchain_core.documents": None, "langchain": MagicMock(), "langchain.schema": mock_legacy}):
+        with patch.dict(
+            "sys.modules",
+            {
+                "langchain_core": None,
+                "langchain_core.documents": None,
+                "langchain": MagicMock(),
+                "langchain.schema": mock_legacy,
+            },
+        ):
             loader = FlamehavenLangChainLoader(str(f))
             docs = loader.load()
             assert len(docs) >= 1
@@ -166,10 +218,13 @@ class TestFlamehavenLlamaIndexReader:
             def __init__(self, text="", metadata=None):
                 self.text = text
                 self.metadata = metadata or {}
+
         return FakeLIDocument
 
     def test_load_raises_without_llama_index(self, tmp_path):
-        from flamehaven_filesearch.integrations.docling_loaders import FlamehavenLlamaIndexReader
+        from flamehaven_filesearch.integrations.docling_loaders import (
+            FlamehavenLlamaIndexReader,
+        )
 
         f = tmp_path / "note.txt"
         f.write_text("hi")
@@ -180,7 +235,9 @@ class TestFlamehavenLlamaIndexReader:
                 reader.load_data([str(f)])
 
     def test_load_with_mocked_llama_index(self, tmp_path):
-        from flamehaven_filesearch.integrations.docling_loaders import FlamehavenLlamaIndexReader
+        from flamehaven_filesearch.integrations.docling_loaders import (
+            FlamehavenLlamaIndexReader,
+        )
 
         f = tmp_path / "test.txt"
         f.write_text("llama index content")
@@ -189,13 +246,17 @@ class TestFlamehavenLlamaIndexReader:
         mock_li = MagicMock()
         mock_li.Document = FakeLIDocument
 
-        with patch.dict("sys.modules", {"llama_index": MagicMock(), "llama_index.core": mock_li}):
+        with patch.dict(
+            "sys.modules", {"llama_index": MagicMock(), "llama_index.core": mock_li}
+        ):
             reader = FlamehavenLlamaIndexReader()
             docs = reader.load_data([str(f)])
             assert len(docs) == 1
 
     def test_load_multiple_files(self, tmp_path):
-        from flamehaven_filesearch.integrations.docling_loaders import FlamehavenLlamaIndexReader
+        from flamehaven_filesearch.integrations.docling_loaders import (
+            FlamehavenLlamaIndexReader,
+        )
 
         files = []
         for i in range(3):
@@ -207,13 +268,17 @@ class TestFlamehavenLlamaIndexReader:
         mock_li = MagicMock()
         mock_li.Document = FakeLIDocument
 
-        with patch.dict("sys.modules", {"llama_index": MagicMock(), "llama_index.core": mock_li}):
+        with patch.dict(
+            "sys.modules", {"llama_index": MagicMock(), "llama_index.core": mock_li}
+        ):
             reader = FlamehavenLlamaIndexReader()
             docs = reader.load_data(files)
             assert len(docs) == 3
 
     def test_load_with_chunking(self, tmp_path):
-        from flamehaven_filesearch.integrations.docling_loaders import FlamehavenLlamaIndexReader
+        from flamehaven_filesearch.integrations.docling_loaders import (
+            FlamehavenLlamaIndexReader,
+        )
 
         f = tmp_path / "chunky.txt"
         f.write_text("word " * 300)
@@ -222,7 +287,9 @@ class TestFlamehavenLlamaIndexReader:
         mock_li = MagicMock()
         mock_li.Document = FakeLIDocument
 
-        with patch.dict("sys.modules", {"llama_index": MagicMock(), "llama_index.core": mock_li}):
+        with patch.dict(
+            "sys.modules", {"llama_index": MagicMock(), "llama_index.core": mock_li}
+        ):
             reader = FlamehavenLlamaIndexReader(chunk=True, max_tokens=50)
             docs = reader.load_data([str(f)])
             assert len(docs) >= 1
@@ -239,10 +306,13 @@ class TestFlamehavenHaystackConverter:
             def __init__(self, content="", meta=None):
                 self.content = content
                 self.meta = meta or {}
+
         return FakeHSDocument
 
     def test_run_raises_without_haystack(self, tmp_path):
-        from flamehaven_filesearch.integrations.docling_loaders import FlamehavenHaystackConverter
+        from flamehaven_filesearch.integrations.docling_loaders import (
+            FlamehavenHaystackConverter,
+        )
 
         f = tmp_path / "note.txt"
         f.write_text("hi")
@@ -253,7 +323,9 @@ class TestFlamehavenHaystackConverter:
                 converter.run([str(f)])
 
     def test_run_with_mocked_haystack(self, tmp_path):
-        from flamehaven_filesearch.integrations.docling_loaders import FlamehavenHaystackConverter
+        from flamehaven_filesearch.integrations.docling_loaders import (
+            FlamehavenHaystackConverter,
+        )
 
         f = tmp_path / "test.txt"
         f.write_text("haystack test content")
@@ -269,7 +341,9 @@ class TestFlamehavenHaystackConverter:
             assert len(result["documents"]) == 1
 
     def test_run_multiple_files(self, tmp_path):
-        from flamehaven_filesearch.integrations.docling_loaders import FlamehavenHaystackConverter
+        from flamehaven_filesearch.integrations.docling_loaders import (
+            FlamehavenHaystackConverter,
+        )
 
         files = []
         for i in range(2):
@@ -287,7 +361,9 @@ class TestFlamehavenHaystackConverter:
             assert len(result["documents"]) == 2
 
     def test_run_with_chunking(self, tmp_path):
-        from flamehaven_filesearch.integrations.docling_loaders import FlamehavenHaystackConverter
+        from flamehaven_filesearch.integrations.docling_loaders import (
+            FlamehavenHaystackConverter,
+        )
 
         f = tmp_path / "long.txt"
         f.write_text("sentence. " * 200)
@@ -302,7 +378,9 @@ class TestFlamehavenHaystackConverter:
             assert "documents" in result
 
     def test_run_fallback_to_haystack_schema(self, tmp_path):
-        from flamehaven_filesearch.integrations.docling_loaders import FlamehavenHaystackConverter
+        from flamehaven_filesearch.integrations.docling_loaders import (
+            FlamehavenHaystackConverter,
+        )
 
         f = tmp_path / "fallback.txt"
         f.write_text("schema fallback")
@@ -311,7 +389,9 @@ class TestFlamehavenHaystackConverter:
         mock_schema = MagicMock()
         mock_schema.Document = FakeHSDocument
 
-        with patch.dict("sys.modules", {"haystack": None, "haystack.schema": mock_schema}):
+        with patch.dict(
+            "sys.modules", {"haystack": None, "haystack.schema": mock_schema}
+        ):
             converter = FlamehavenHaystackConverter()
             result = converter.run([str(f)])
             assert "documents" in result
@@ -325,4 +405,5 @@ class TestFlamehavenHaystackConverter:
 class TestIntegrationsInit:
     def test_import_integrations(self):
         import flamehaven_filesearch.integrations as integrations_pkg
+
         assert integrations_pkg is not None

@@ -247,7 +247,9 @@ Body text here.
     def test_aliases_from_frontmatter(self):
         text = "---\naliases: [ml notes, ml guide]\n---\nContent"
         note = parse_obsidian_markdown(text)
-        assert "ml notes" in note.aliases or "ml notes".replace(" ", "") in str(note.aliases)
+        assert "ml notes" in note.aliases or "ml notes".replace(" ", "") in str(
+            note.aliases
+        )
 
     def test_empty_text(self):
         note = parse_obsidian_markdown("")

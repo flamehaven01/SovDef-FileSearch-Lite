@@ -29,7 +29,9 @@ class TestTextChunker:
     def test_chunk_text_basic(self):
         from flamehaven_filesearch.engine.text_chunker import chunk_text
 
-        text = "# Section 1\n\nParagraph one here.\n\n# Section 2\n\nParagraph two here."
+        text = (
+            "# Section 1\n\nParagraph one here.\n\n# Section 2\n\nParagraph two here."
+        )
         chunks = chunk_text(text, max_tokens=50)
         assert isinstance(chunks, list)
         assert len(chunks) >= 1
@@ -87,7 +89,9 @@ class TestTextChunker:
 
         text = "word " * 500
         chunks = chunk_text(text, max_tokens=256)
-        resplit = resplit_chunks_character_windows(chunks, chunk_size_chars=200, chunk_overlap_chars=20)
+        resplit = resplit_chunks_character_windows(
+            chunks, chunk_size_chars=200, chunk_overlap_chars=20
+        )
         assert isinstance(resplit, list)
         assert len(resplit) >= 1
 
@@ -282,7 +286,11 @@ class TestKnowledgeAtom:
         long_text = "word " * 20  # 100 chars
         chunks = [
             {"text": long_text, "headings": ["H1"], "context": ""},
-            {"text": long_text + " more content here for testing purposes", "headings": [], "context": "context1"},
+            {
+                "text": long_text + " more content here for testing purposes",
+                "headings": [],
+                "context": "context1",
+            },
         ]
         inject_chunks(
             chunks=chunks,
@@ -458,7 +466,11 @@ class TestGravitasPacker:
         stats = packer.get_stats()
         assert isinstance(stats, dict)
         # Check for actual keys present in GravitasPacker stats
-        assert "total_compressed" in stats or "total_compressions" in stats or "compression_ratio" in stats
+        assert (
+            "total_compressed" in stats
+            or "total_compressions" in stats
+            or "compression_ratio" in stats
+        )
 
 
 # ---------------------------------------------------------------------------

@@ -101,8 +101,11 @@ class TestTryOAuthAdmin:
 
     def test_valid_jwt_without_admin_raises_403(self):
         import jwt as pyjwt
+
         secret = "admintest"
-        token = pyjwt.encode({"sub": "nonadmin", "scope": "search"}, secret, algorithm="HS256")
+        token = pyjwt.encode(
+            {"sub": "nonadmin", "scope": "search"}, secret, algorithm="HS256"
+        )
 
         cfg = Config.__new__(Config)
         cfg.oauth_enabled = True
@@ -116,8 +119,11 @@ class TestTryOAuthAdmin:
 
     def test_valid_jwt_with_admin_returns_subject(self):
         import jwt as pyjwt
+
         secret = "adminsecret"
-        token = pyjwt.encode({"sub": "adminuser", "roles": ["admin"]}, secret, algorithm="HS256")
+        token = pyjwt.encode(
+            {"sub": "adminuser", "roles": ["admin"]}, secret, algorithm="HS256"
+        )
 
         cfg = Config.__new__(Config)
         cfg.oauth_enabled = True
@@ -146,8 +152,14 @@ class TestResolveKeyAdmin:
             mock_iam.validate_admin_token.return_value = None
             mock_km = MagicMock()
             mock_km.validate_key.return_value = None
-            with patch("flamehaven_filesearch.admin_routes.get_iam_provider", return_value=mock_iam):
-                with patch("flamehaven_filesearch.admin_routes.get_key_manager", return_value=mock_km):
+            with patch(
+                "flamehaven_filesearch.admin_routes.get_iam_provider",
+                return_value=mock_iam,
+            ):
+                with patch(
+                    "flamehaven_filesearch.admin_routes.get_key_manager",
+                    return_value=mock_km,
+                ):
                     with pytest.raises(HTTPException) as exc_info:
                         _resolve_key_admin("bad_key")
                     assert exc_info.value.status_code == 401
@@ -160,8 +172,14 @@ class TestResolveKeyAdmin:
             mock_key_info.permissions = ["search"]
             mock_km = MagicMock()
             mock_km.validate_key.return_value = mock_key_info
-            with patch("flamehaven_filesearch.admin_routes.get_iam_provider", return_value=mock_iam):
-                with patch("flamehaven_filesearch.admin_routes.get_key_manager", return_value=mock_km):
+            with patch(
+                "flamehaven_filesearch.admin_routes.get_iam_provider",
+                return_value=mock_iam,
+            ):
+                with patch(
+                    "flamehaven_filesearch.admin_routes.get_key_manager",
+                    return_value=mock_km,
+                ):
                     with pytest.raises(HTTPException) as exc_info:
                         _resolve_key_admin("user_key")
                     assert exc_info.value.status_code == 403
@@ -175,8 +193,14 @@ class TestResolveKeyAdmin:
             mock_key_info.user_id = "admin_user"
             mock_km = MagicMock()
             mock_km.validate_key.return_value = mock_key_info
-            with patch("flamehaven_filesearch.admin_routes.get_iam_provider", return_value=mock_iam):
-                with patch("flamehaven_filesearch.admin_routes.get_key_manager", return_value=mock_km):
+            with patch(
+                "flamehaven_filesearch.admin_routes.get_iam_provider",
+                return_value=mock_iam,
+            ):
+                with patch(
+                    "flamehaven_filesearch.admin_routes.get_key_manager",
+                    return_value=mock_km,
+                ):
                     result = _resolve_key_admin("admin_key")
                     assert result == "admin_user"
 
@@ -184,7 +208,10 @@ class TestResolveKeyAdmin:
         with patch.dict(os.environ, {"FLAMEHAVEN_ADMIN_KEY": ""}):
             mock_iam = MagicMock()
             mock_iam.validate_admin_token.return_value = "iam_user"
-            with patch("flamehaven_filesearch.admin_routes.get_iam_provider", return_value=mock_iam):
+            with patch(
+                "flamehaven_filesearch.admin_routes.get_iam_provider",
+                return_value=mock_iam,
+            ):
                 result = _resolve_key_admin("iam_token")
                 assert result == "iam_user"
 

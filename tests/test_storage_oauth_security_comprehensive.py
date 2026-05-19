@@ -274,6 +274,7 @@ class TestValidateOAuthToken:
 
     def test_valid_hs256_token(self):
         import jwt as pyjwt
+
         secret = "testsecret"
         payload = {"sub": "user123", "scope": "search upload"}
         token = pyjwt.encode(payload, secret, algorithm="HS256")
@@ -290,6 +291,7 @@ class TestValidateOAuthToken:
 
     def test_valid_hs256_token_with_roles(self):
         import jwt as pyjwt
+
         secret = "testsecret2"
         payload = {"sub": "admin_user", "roles": ["admin"], "groups": ["devs"]}
         token = pyjwt.encode(payload, secret, algorithm="HS256")
@@ -305,6 +307,7 @@ class TestValidateOAuthToken:
 
     def test_subject_fallbacks(self):
         import jwt as pyjwt
+
         secret = "fallback_secret"
         payload = {"preferred_username": "fallback_user"}
         token = pyjwt.encode(payload, secret, algorithm="HS256")

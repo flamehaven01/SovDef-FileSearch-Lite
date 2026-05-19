@@ -6,6 +6,8 @@ Tests complete API workflows with rate limiting, validation, and error handling.
 
 import pytest
 
+from flamehaven_filesearch import __version__
+
 
 class TestAPIIntegration:
     """Integration tests for complete API workflows"""
@@ -20,7 +22,7 @@ class TestAPIIntegration:
         # Verify all expected fields
         assert "status" in data
         assert "version" in data
-        assert data["version"] == "1.4.2"
+        assert data["version"] == __version__
         assert "uptime_seconds" in data
         assert "uptime_formatted" in data
         assert "searcher_initialized" in data
@@ -180,7 +182,7 @@ class TestAPIIntegration:
 
         # Verify API info
         assert data["name"] == "FLAMEHAVEN FileSearch API"
-        assert data["version"] == "1.4.2"
+        assert data["version"] == __version__
         assert "endpoints" in data
         assert "rate_limits" in data
 
@@ -329,12 +331,12 @@ class TestAPIIntegration:
         # Health check
         response = client.get("/health")
         if response.status_code == 200:
-            assert response.json()["version"] == "1.4.2"
+            assert response.json()["version"] == __version__
 
         # Root endpoint
         response = client.get("/")
         if response.status_code == 200:
-            assert response.json()["version"] == "1.4.2"
+            assert response.json()["version"] == __version__
 
 
 class TestAPIPerformance:

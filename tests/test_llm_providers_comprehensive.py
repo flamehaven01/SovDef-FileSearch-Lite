@@ -62,9 +62,19 @@ class TestGeminiProvider:
         mock_genai.Client.return_value = mock_client
         mock_types = MagicMock()
 
-        with patch.dict("sys.modules", {"google": MagicMock(), "google.genai": mock_genai, "google.genai.types": mock_types}):
+        with patch.dict(
+            "sys.modules",
+            {
+                "google": MagicMock(),
+                "google.genai": mock_genai,
+                "google.genai.types": mock_types,
+            },
+        ):
             from flamehaven_filesearch.engine.llm_providers import GeminiProvider
-            with patch("google.genai", mock_genai), patch("google.genai.types", mock_types):
+
+            with patch("google.genai", mock_genai), patch(
+                "google.genai.types", mock_types
+            ):
                 try:
                     p = GeminiProvider.__new__(GeminiProvider)
                     p._client = mock_client
@@ -77,12 +87,14 @@ class TestGeminiProvider:
 
     def test_gemini_provider_name(self):
         from flamehaven_filesearch.engine.llm_providers import GeminiProvider
+
         p = GeminiProvider.__new__(GeminiProvider)
         p._model = "gemini-2.0"
         assert "gemini" in p.provider_name
 
     def test_gemini_generate_failure_returns_empty(self):
         from flamehaven_filesearch.engine.llm_providers import GeminiProvider
+
         mock_client = MagicMock()
         mock_client.models.generate_content.side_effect = RuntimeError("API error")
         p = GeminiProvider.__new__(GeminiProvider)
@@ -94,6 +106,7 @@ class TestGeminiProvider:
 
     def test_gemini_generate_none_text(self):
         from flamehaven_filesearch.engine.llm_providers import GeminiProvider
+
         mock_resp = MagicMock()
         mock_resp.text = None
         mock_client = MagicMock()
@@ -107,6 +120,7 @@ class TestGeminiProvider:
 
     def test_gemini_import_error(self):
         import builtins
+
         real_import = builtins.__import__
 
         def mock_import(name, *args, **kwargs):
@@ -115,6 +129,7 @@ class TestGeminiProvider:
             return real_import(name, *args, **kwargs)
 
         from flamehaven_filesearch.engine.llm_providers import GeminiProvider
+
         with patch("builtins.__import__", side_effect=mock_import):
             with pytest.raises(ImportError):
                 GeminiProvider("key", "model")
@@ -128,12 +143,14 @@ class TestGeminiProvider:
 class TestOpenAIProvider:
     def test_openai_provider_name(self):
         from flamehaven_filesearch.engine.llm_providers import OpenAIProvider
+
         p = OpenAIProvider.__new__(OpenAIProvider)
         p._model = "gpt-4o"
         assert "openai" in p.provider_name
 
     def test_openai_generate(self):
         from flamehaven_filesearch.engine.llm_providers import OpenAIProvider
+
         mock_choice = MagicMock()
         mock_choice.message.content = "openai answer"
         mock_resp = MagicMock()
@@ -149,6 +166,7 @@ class TestOpenAIProvider:
 
     def test_openai_generate_failure(self):
         from flamehaven_filesearch.engine.llm_providers import OpenAIProvider
+
         mock_client = MagicMock()
         mock_client.chat.completions.create.side_effect = RuntimeError("API fail")
         p = OpenAIProvider.__new__(OpenAIProvider)
@@ -159,6 +177,7 @@ class TestOpenAIProvider:
 
     def test_openai_generate_none_content(self):
         from flamehaven_filesearch.engine.llm_providers import OpenAIProvider
+
         mock_choice = MagicMock()
         mock_choice.message.content = None
         mock_resp = MagicMock()
@@ -193,6 +212,7 @@ class TestOpenAIProvider:
 
     def test_openai_import_error(self):
         import builtins
+
         real_import = builtins.__import__
 
         def mock_import(name, *args, **kwargs):
@@ -201,6 +221,7 @@ class TestOpenAIProvider:
             return real_import(name, *args, **kwargs)
 
         from flamehaven_filesearch.engine.llm_providers import OpenAIProvider
+
         with patch("builtins.__import__", side_effect=mock_import):
             with pytest.raises(ImportError):
                 OpenAIProvider("key", "model")
@@ -214,12 +235,14 @@ class TestOpenAIProvider:
 class TestAnthropicProvider:
     def test_anthropic_provider_name(self):
         from flamehaven_filesearch.engine.llm_providers import AnthropicProvider
+
         p = AnthropicProvider.__new__(AnthropicProvider)
         p._model = "claude-opus-4"
         assert "anthropic" in p.provider_name
 
     def test_anthropic_generate(self):
         from flamehaven_filesearch.engine.llm_providers import AnthropicProvider
+
         mock_content = MagicMock()
         mock_content.text = "claude response"
         mock_msg = MagicMock()
@@ -235,6 +258,7 @@ class TestAnthropicProvider:
 
     def test_anthropic_generate_empty_content(self):
         from flamehaven_filesearch.engine.llm_providers import AnthropicProvider
+
         mock_msg = MagicMock()
         mock_msg.content = []
         mock_client = MagicMock()
@@ -248,6 +272,7 @@ class TestAnthropicProvider:
 
     def test_anthropic_generate_failure(self):
         from flamehaven_filesearch.engine.llm_providers import AnthropicProvider
+
         mock_client = MagicMock()
         mock_client.messages.create.side_effect = RuntimeError("API error")
         p = AnthropicProvider.__new__(AnthropicProvider)
@@ -258,6 +283,7 @@ class TestAnthropicProvider:
 
     def test_anthropic_import_error(self):
         import builtins
+
         real_import = builtins.__import__
 
         def mock_import(name, *args, **kwargs):
@@ -266,6 +292,7 @@ class TestAnthropicProvider:
             return real_import(name, *args, **kwargs)
 
         from flamehaven_filesearch.engine.llm_providers import AnthropicProvider
+
         with patch("builtins.__import__", side_effect=mock_import):
             with pytest.raises(ImportError):
                 AnthropicProvider("key", "model")
@@ -363,6 +390,7 @@ class TestCreateLlmProvider:
         cfg.openai_api_key = "none"
         cfg.openai_base_url = "http://localhost:8000/v1"
         from flamehaven_filesearch.engine.llm_providers import OpenAIProvider
+
         try:
             p = create_llm_provider(cfg)
             assert isinstance(p, OpenAIProvider)
@@ -373,6 +401,7 @@ class TestCreateLlmProvider:
         cfg = self._cfg("kimi")
         cfg.openai_base_url = "https://api.moonshot.cn/v1"
         from flamehaven_filesearch.engine.llm_providers import OpenAIProvider
+
         try:
             p = create_llm_provider(cfg)
             assert isinstance(p, OpenAIProvider)
@@ -395,6 +424,7 @@ class TestCreateLlmProvider:
     def test_openai_provider(self):
         cfg = self._cfg("openai")
         from flamehaven_filesearch.engine.llm_providers import OpenAIProvider
+
         try:
             p = create_llm_provider(cfg)
             assert isinstance(p, OpenAIProvider)
@@ -404,6 +434,7 @@ class TestCreateLlmProvider:
     def test_anthropic_provider(self):
         cfg = self._cfg("anthropic")
         from flamehaven_filesearch.engine.llm_providers import AnthropicProvider
+
         try:
             p = create_llm_provider(cfg)
             assert isinstance(p, AnthropicProvider)
@@ -413,6 +444,7 @@ class TestCreateLlmProvider:
     def test_gemini_provider(self):
         cfg = self._cfg("gemini")
         from flamehaven_filesearch.engine.llm_providers import GeminiProvider
+
         try:
             p = create_llm_provider(cfg)
             assert isinstance(p, GeminiProvider)

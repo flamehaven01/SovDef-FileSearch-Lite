@@ -10,6 +10,8 @@ it reads, and asserts those fields are present in real API responses.
 
 import pytest
 
+from flamehaven_filesearch import __version__
+
 
 class TestSearchPageContract:
     """
@@ -371,8 +373,8 @@ class TestDashboardPageContract:
         assert "name" in data
         assert "version" in data
         assert (
-            data["version"] == "1.4.2"
-        ), f"Version mismatch: expected 1.4.2, got {data['version']}"
+            data["version"] == __version__
+        ), f"Version mismatch: expected {__version__}, got {data['version']}"
 
 
 if __name__ == "__main__":

@@ -40,7 +40,10 @@ class FileUploadError(FileSearchException):
     """Base class for file upload related errors"""
 
     def __init__(self, message: str, error_code: str = "FILE_UPLOAD_ERROR", **kwargs):
-        super().__init__(message, status_code=400, error_code=error_code, **kwargs)
+        status_code = kwargs.pop("status_code", 400)
+        super().__init__(
+            message, status_code=status_code, error_code=error_code, **kwargs
+        )
 
 
 class FileSizeExceededError(FileUploadError):
@@ -89,6 +92,8 @@ class FileProcessingError(FileUploadError):
     """Error processing uploaded file"""
 
     def __init__(self, message: str, filename: Optional[str] = None):
+        if filename and "." in message and " " not in message:
+            message, filename = filename, message
         details = {}
         if filename:
             details["filename"] = filename
@@ -101,7 +106,10 @@ class SearchError(FileSearchException):
     """Base class for search related errors"""
 
     def __init__(self, message: str, error_code: str = "SEARCH_ERROR", **kwargs):
-        super().__init__(message, status_code=400, error_code=error_code, **kwargs)
+        status_code = kwargs.pop("status_code", 400)
+        super().__init__(
+            message, status_code=status_code, error_code=error_code, **kwargs
+        )
 
 
 class EmptySearchQueryError(SearchError):
@@ -159,9 +167,18 @@ class NoResultsFoundError(FileSearchException):
 class ConfigurationError(FileSearchException):
     """Configuration related errors"""
 
-    def __init__(self, message: str, **kwargs):
+    def __init__(self, message: str, field: Optional[str] = None, **kwargs):
+        details = kwargs.pop("details", {}) or {}
+        if field:
+            details.setdefault("field", field)
+        status_code = kwargs.pop("status_code", 500)
+        error_code = kwargs.pop("error_code", "CONFIGURATION_ERROR")
         super().__init__(
-            message, status_code=500, error_code="CONFIGURATION_ERROR", **kwargs
+            message,
+            status_code=status_code,
+            error_code=error_code,
+            details=details,
+            **kwargs,
         )
 
 
@@ -202,7 +219,26 @@ class InvalidAPIKeyError(ConfigurationError):
 class RateLimitExceededError(FileSearchException):
     """Rate limit exceeded"""
 
-    def __init__(self, limit: int, window: int, retry_after: Optional[int] = None):
+    def __init__(
+        self,
+        limit: Any,
+        window: Optional[int] = None,
+        retry_after: Optional[int] = None,
+    ):
+        if isinstance(limit, str) and window is None:
+            details = {}
+            if retry_after:
+                details["retry_after_seconds"] = retry_after
+            super().__init__(
+                limit,
+                status_code=429,
+                error_code="RATE_LIMIT_EXCEEDED",
+                details=details,
+            )
+            return
+
+        if window is None:
+            window = 60
         details = {
             "limit": limit,
             "window_seconds": window,

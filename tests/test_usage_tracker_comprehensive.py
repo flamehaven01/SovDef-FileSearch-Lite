@@ -54,7 +54,9 @@ def _make_record(
 
 class TestUsageRecord:
     def test_totals_computed(self):
-        r = _make_record(req_tokens=100, resp_tokens=200, req_bytes=512, resp_bytes=1024)
+        r = _make_record(
+            req_tokens=100, resp_tokens=200, req_bytes=512, resp_bytes=1024
+        )
         assert r.total_tokens == 300
         assert r.total_bytes == 1536
 
@@ -244,7 +246,9 @@ class TestGetUsageStats:
         now = datetime.now(timezone.utc)
         tracker.record_usage(_make_record(api_key_id="k6"))
         start = now - timedelta(hours=1)
-        stats = tracker.get_usage_stats("k6", start_time=start, end_time=now + timedelta(hours=1))
+        stats = tracker.get_usage_stats(
+            "k6", start_time=start, end_time=now + timedelta(hours=1)
+        )
         assert stats.total_requests >= 1
 
 
@@ -266,7 +270,9 @@ class TestGetRecentAlerts:
         assert alerts == []
 
     def test_alerts_after_quota_exceed(self, tracker):
-        tracker.set_quota("ka2", QuotaConfig(daily_requests=1, alert_threshold_pct=50.0))
+        tracker.set_quota(
+            "ka2", QuotaConfig(daily_requests=1, alert_threshold_pct=50.0)
+        )
         tracker.record_usage(_make_record(api_key_id="ka2"))
         tracker.record_usage(_make_record(api_key_id="ka2"))
         alerts = tracker.get_recent_alerts(api_key_id="ka2")

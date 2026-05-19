@@ -114,9 +114,7 @@ class TestGenerateKey:
         assert info.is_active is True
 
     def test_custom_permissions(self, manager):
-        _, plain_key = manager.generate_key(
-            "user1", "Key", permissions=["search"]
-        )
+        _, plain_key = manager.generate_key("user1", "Key", permissions=["search"])
         info = manager.validate_key(plain_key)
         assert "search" in info.permissions
 

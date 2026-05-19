@@ -133,7 +133,12 @@ class TestDocAccessors:
         assert "note.md" in path
 
     def test_doc_uri_path_non_local(self, searcher):
-        doc = {"title": "A", "uri": "http://example.com", "content": "x", "metadata": {}}
+        doc = {
+            "title": "A",
+            "uri": "http://example.com",
+            "content": "x",
+            "metadata": {},
+        }
         assert searcher._doc_uri_path(doc) == ""
 
     def test_doc_uri_path_no_slash(self, searcher):
@@ -161,7 +166,10 @@ class TestClusterKey:
         assert searcher._document_cluster_key(None) == ""
 
     def test_canonical_uri_strips_fragment(self, searcher):
-        assert searcher._canonical_uri("local://default/path#anchor") == "local://default/path"
+        assert (
+            searcher._canonical_uri("local://default/path#anchor")
+            == "local://default/path"
+        )
 
     def test_canonical_uri_no_fragment(self, searcher):
         assert searcher._canonical_uri("local://default/path") == "local://default/path"
@@ -197,7 +205,9 @@ class TestQueryHelpers:
         assert out == "hello world"
 
     def test_lexical_token_hits(self, searcher):
-        hits = searcher._lexical_token_hits("python programming is great", ["python", "great"])
+        hits = searcher._lexical_token_hits(
+            "python programming is great", ["python", "great"]
+        )
         assert hits == 2
 
     def test_lexical_token_hits_none(self, searcher):
@@ -211,7 +221,9 @@ class TestQueryHelpers:
 
 class TestMatchPhrasePrefix:
     def test_full_match(self, searcher):
-        score = searcher._match_phrase_prefix_score("python programming", ["python", "prog"])
+        score = searcher._match_phrase_prefix_score(
+            "python programming", ["python", "prog"]
+        )
         assert score > 0.0
 
     def test_no_match(self, searcher):
@@ -437,12 +449,16 @@ class TestLexicalBoost:
         assert searcher._lexical_alignment_boost(doc, "") == 0.0
 
     def test_external_penalty_applied(self, searcher):
-        doc = _make_doc("Some Paper", "content", file_path="/vault/000 외부 논문 핵심/paper.md")
+        doc = _make_doc(
+            "Some Paper", "content", file_path="/vault/000 외부 논문 핵심/paper.md"
+        )
         penalty = searcher._external_reference_penalty(doc, "unrelated query")
         assert penalty > 0.0
 
     def test_external_penalty_zero_when_query_in_title(self, searcher):
-        doc = _make_doc("Some Paper", "content", file_path="/vault/000 외부 논문 핵심/some paper.md")
+        doc = _make_doc(
+            "Some Paper", "content", file_path="/vault/000 외부 논문 핵심/some paper.md"
+        )
         penalty = searcher._external_reference_penalty(doc, "some paper")
         assert penalty == 0.0
 
@@ -458,7 +474,9 @@ class TestLexicalBoost:
 
 class TestBm25CorpusText:
     def test_basic(self, searcher):
-        doc = _make_doc("Python Notes", "python is cool", headings=["Intro"], tags=["python"])
+        doc = _make_doc(
+            "Python Notes", "python is cool", headings=["Intro"], tags=["python"]
+        )
         text = searcher._build_bm25_corpus_text(doc)
         assert "Python Notes" in text or "python notes" in text.lower()
         assert "python" in text.lower()
@@ -506,7 +524,12 @@ class TestGetDocByUri:
 
     def test_found_in_atoms(self, searcher):
         atom_uri = "local://default/path#chunk_0"
-        atom = {"title": "chunk", "uri": atom_uri, "content": "chunk content", "metadata": {}}
+        atom = {
+            "title": "chunk",
+            "uri": atom_uri,
+            "content": "chunk content",
+            "metadata": {},
+        }
         searcher._atom_store_docs["default"] = {atom_uri: atom}
         result = searcher._get_doc_by_uri("default", atom_uri)
         assert result is not None
@@ -542,7 +565,12 @@ class TestRebuildBm25:
         _inject_docs(searcher, docs)
         atom_uri = "local://default/a#chunk_0"
         searcher._atom_store_docs["default"] = {
-            atom_uri: {"title": "chunk", "uri": atom_uri, "content": "chunk content", "metadata": {}}
+            atom_uri: {
+                "title": "chunk",
+                "uri": atom_uri,
+                "content": "chunk content",
+                "metadata": {},
+            }
         }
         searcher._rebuild_bm25("default")
         bm25, uri_map = searcher._bm25_indices["default"]
@@ -744,7 +772,9 @@ class TestRunHybridRerank:
             ({"uri": docs[0]["uri"]}, 0.9),
             ({"uri": docs[1]["uri"]}, 0.5),
         ]
-        resolved, confidence = searcher._run_hybrid_rerank("default", "python", sem_results)
+        resolved, confidence = searcher._run_hybrid_rerank(
+            "default", "python", sem_results
+        )
         assert isinstance(resolved, list)
         assert 0.0 <= confidence <= 1.0
 
@@ -782,8 +812,13 @@ class TestLocalSearch:
         docs = [_make_doc("Python Guide", "python is a programming language")]
         _inject_docs(searcher, docs)
         result = searcher._local_search(
-            "default", "python", 1000, 0.7, "gemini-1.5-flash",
-            search_mode="semantic", semantic_results=[]
+            "default",
+            "python",
+            1000,
+            0.7,
+            "gemini-1.5-flash",
+            search_mode="semantic",
+            semantic_results=[],
         )
         assert result["status"] == "success"
         assert "semantic_results" in result
@@ -791,8 +826,13 @@ class TestLocalSearch:
     def test_semantic_mode_no_docs_returns_empty_list(self, searcher):
         _inject_docs(searcher, [])
         result = searcher._local_search(
-            "default", "python", 1000, 0.7, "gemini-1.5-flash",
-            search_mode="semantic", semantic_results=[]
+            "default",
+            "python",
+            1000,
+            0.7,
+            "gemini-1.5-flash",
+            search_mode="semantic",
+            semantic_results=[],
         )
         assert result["semantic_results"] == []
 
@@ -804,8 +844,13 @@ class TestLocalSearch:
         _inject_docs(searcher, docs)
         sem_results = [({"uri": docs[0]["uri"]}, 0.8)]
         result = searcher._local_search(
-            "default", "python", 1000, 0.7, "gemini-1.5-flash",
-            search_mode="hybrid", semantic_results=sem_results
+            "default",
+            "python",
+            1000,
+            0.7,
+            "gemini-1.5-flash",
+            search_mode="hybrid",
+            semantic_results=sem_results,
         )
         assert result["status"] == "success"
         assert "semantic_results" in result
@@ -814,8 +859,13 @@ class TestLocalSearch:
         docs = [_make_doc("python notes", "python is a programming language")]
         _inject_docs(searcher, docs)
         result = searcher._local_search(
-            "default", "python notes", 1000, 0.7, "gemini-1.5-flash",
-            search_mode="semantic", semantic_results=[]
+            "default",
+            "python notes",
+            1000,
+            0.7,
+            "gemini-1.5-flash",
+            search_mode="semantic",
+            semantic_results=[],
         )
         assert result["status"] == "success"
 
@@ -823,16 +873,13 @@ class TestLocalSearch:
         docs = [_make_doc("Python Guide", "python tutorial programming")]
         _inject_docs(searcher, docs)
         result = searcher._local_search(
-            "default", "python", 1000, 0.7, "gemini-1.5-flash",
-            search_mode="keyword"
+            "default", "python", 1000, 0.7, "gemini-1.5-flash", search_mode="keyword"
         )
         assert result["status"] == "success"
 
     def test_base_fields_present(self, searcher):
         _inject_docs(searcher, [])
-        result = searcher._local_search(
-            "default", "query", 500, 0.5, "model"
-        )
+        result = searcher._local_search("default", "query", 500, 0.5, "model")
         assert "model" in result
         assert "query" in result
         assert "store" in result
@@ -841,8 +888,13 @@ class TestLocalSearch:
     def test_search_mode_multimodal_no_docs(self, searcher):
         _inject_docs(searcher, [])
         result = searcher._local_search(
-            "default", "image query", 1000, 0.7, "model",
-            search_mode="multimodal", semantic_results=[]
+            "default",
+            "image query",
+            1000,
+            0.7,
+            "model",
+            search_mode="multimodal",
+            semantic_results=[],
         )
         assert result["status"] == "success"
         assert "semantic_results" in result
@@ -929,7 +981,9 @@ class TestRunMetaAdapt:
 class TestFallbackSources:
     def test_fallback_keyword_mode_with_docs(self, searcher):
         docs = [_make_doc("Python Notes", "python is great")]
-        answer, sources = searcher._fallback_sources("default", "python", "keyword", None, docs)
+        answer, sources = searcher._fallback_sources(
+            "default", "python", "keyword", None, docs
+        )
         assert isinstance(answer, str)
         assert isinstance(sources, list)
 
@@ -944,6 +998,8 @@ class TestFallbackSources:
 
     def test_fallback_no_results_returns_generic(self, searcher):
         _inject_docs(searcher, [])
-        answer, sources = searcher._fallback_sources("default", "xyz", "keyword", None, [])
+        answer, sources = searcher._fallback_sources(
+            "default", "xyz", "keyword", None, []
+        )
         assert isinstance(answer, str)
         assert isinstance(sources, list)

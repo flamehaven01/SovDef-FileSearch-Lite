@@ -27,7 +27,9 @@ class TestCircuitBreakerInit:
         assert cb.state == CircuitState.CLOSED
 
     def test_custom_thresholds(self):
-        cb = CircuitBreaker(failure_threshold=3, recovery_timeout=30.0, success_threshold=1)
+        cb = CircuitBreaker(
+            failure_threshold=3, recovery_timeout=30.0, success_threshold=1
+        )
         assert cb.failure_threshold == 3
         assert cb.recovery_timeout == 30.0
         assert cb.success_threshold == 1
@@ -110,7 +112,11 @@ class TestCircuitBreakerHalfOpen:
         except Exception:
             pass
         # After timeout, it should have tried
-        assert cb.state in (CircuitState.CLOSED, CircuitState.HALF_OPEN, CircuitState.OPEN)
+        assert cb.state in (
+            CircuitState.CLOSED,
+            CircuitState.HALF_OPEN,
+            CircuitState.OPEN,
+        )
 
 
 class TestCircuitBreakerReset:
@@ -187,7 +193,9 @@ class TestRetryWithBackoff:
                 assert sleep_calls[1] >= sleep_calls[0]
 
     def test_max_delay_capped(self):
-        @retry_with_backoff(max_retries=3, initial_delay=1.0, max_delay=1.5, backoff_factor=10.0)
+        @retry_with_backoff(
+            max_retries=3, initial_delay=1.0, max_delay=1.5, backoff_factor=10.0
+        )
         def always_fail():
             raise RuntimeError("fail")
 
