@@ -142,8 +142,9 @@ class FlamehavenPersistence:
 
     def list_persisted_stores(self) -> List[str]:
         """Return names of all stores with persisted snapshots."""
+        suffix = "_docs"
         return [
-            p.stem.removesuffix("_docs")
+            p.stem[: -len(suffix)] if p.stem.endswith(suffix) else p.stem
             for p in sorted(self._stores_dir.glob("*_docs.json"))
         ]
 
